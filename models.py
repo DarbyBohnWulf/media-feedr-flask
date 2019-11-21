@@ -1,7 +1,7 @@
 from peewee import *
 from flask_login import UserMixin
 
-DATABASE = SqliteDatabase('media.sqlite')
+DATABASE = SqliteDatabase('media.sqlite', pragmas={'foreign_keys': 1})
 
 
 class User(UserMixin, Model):
@@ -30,8 +30,8 @@ class Media(Model):
 
 
 class Viewership(Model):
-    user_id = ForeignKeyField(User)
-    media_id = ForeignKeyField(Media)
+    user_id = ForeignKeyField(User, backref='viewerships')
+    media_id = ForeignKeyField(Media, backref='viewerships')
 
     class Meta:
         database = DATABASE
@@ -40,8 +40,8 @@ class Viewership(Model):
 class Review(Model):
     rating = IntegerField(constraints=[Check('rating < 6')])
     body = TextField()
-    user_id = ForeignKeyField(User)
-    media_id = ForeignKeyField(Media)
+    user_id = ForeignKeyField(User, backref='reviews')
+    media_id = ForeignKeyField(Media, backref='reviews')
     date_added = TimestampField()
 
     class Meta:
