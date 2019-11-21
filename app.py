@@ -1,4 +1,6 @@
 from flask import Flask, jsonify, g
+from flask_login import LoginManager
+from resources.users import user
 import os
 import models
 
@@ -6,6 +8,8 @@ app = Flask('media-api')
 app.secret_key = os.environ.get(
     'SECRET_KEY', 'notreallyasecretbutsureyoudoyoudude'
 )
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 
 @app.before_request
@@ -20,6 +24,30 @@ def after_request(res):
     print("disconnected from db")
     g.db.close()
     return res
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    try:
+        return models.User.get_by_id(user_id)
+    except models.DoesNotExist:
+        return None
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    return jsonify(
+        data={
+            "error": "Unauthenticated use of this resource is not allowed"
+        },
+        status={
+            "code": 401,
+            "message": "You must be logged in to do that."
+        }
+    ), 401
+
+
+app.register_blueprint(user, url_prefix='/api/v1/user')
 
 
 if __name__ == '__main__':
