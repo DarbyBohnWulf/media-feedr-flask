@@ -18,7 +18,7 @@ class Media(Model):
     year_of_release = IntegerField(
         constraints=[
             Check('year_of_release > 1905'),
-            Check('year_of_release < 2020')
+            Check('year_of_release < 2021')
         ]
     )
     genre = CharField(32)

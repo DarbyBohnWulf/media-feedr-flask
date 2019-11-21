@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, g
 from flask_login import LoginManager
 from resources.users import user
+from resources.media import media
 import os
 import models
 
@@ -48,6 +49,7 @@ def unauthorized():
 
 
 app.register_blueprint(user, url_prefix='/api/v1/user')
+app.register_blueprint(media, url_prefix='/api/v1/media')
 
 
 if __name__ == '__main__':
