@@ -68,3 +68,31 @@ def show_other_library(userId):
             "message": "Got all their titles."
         }
     )
+
+
+@viewership.route('/<mediaId>', methods=['DELETE'])
+@login_required
+def remove_from_library(mediaId):
+    try:
+        q = (models.Viewership
+             .select()
+             .where((models.Viewership.user_id == current_user.id) &
+                    (models.Viewership.media_id == mediaId)))
+        viewership = q.execute()
+        print(viewership[0])
+        viewership[0].delete_instance()
+        return jsonify(
+            data={},
+            status={
+                "code": 204,
+                "message": "Successfully removed {} from your library."
+            }
+        ), 204
+    except (models.DoesNotExist, IndexError):
+        return jsonify(
+            data={},
+            status={
+                "code": 422,
+                "message": "Couldn't find that entry."
+            }
+        ), 422
