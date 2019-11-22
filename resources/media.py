@@ -4,6 +4,7 @@ from playhouse.shortcuts import model_to_dict
 
 media = Blueprint('media', 'media')
 
+
 @media.route('/', methods=['GET'])
 def index():
     try:
@@ -64,8 +65,19 @@ def add_item():
 def show(id):
     try:
         media = models.Media.get_by_id(id)
+        media_list = model_to_dict(media)
+        reviews = []
+        for r in media.reviews:
+            reviews.append(model_to_dict(r))
+
+        def strip_extra(review):
+            print(review)
+            review.pop('media_id')
+            review['user_id'].pop('password')
+            return review
+        media_list['reviews'] = list(map(strip_extra, reviews))
         return jsonify(
-            data=model_to_dict(media),
+            data=media_list,
             status={
                 "code": 200,
                 "status": "Found requested item."
