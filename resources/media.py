@@ -1,6 +1,6 @@
 import models
 from flask import jsonify, request, Blueprint
-from playhouse.shortcuts import model_to_dict
+from playhouse.shortcuts import model_to_dict, fn
 
 media = Blueprint('media', 'media')
 
@@ -91,3 +91,41 @@ def show(id):
                 "message": "Couldn't locate that media item."
             }
         ), 404
+
+
+@media.route('/latest', methods=['GET'])
+def index_with_reviews():
+    try:
+        # this is some complex peewee that seems to get the job done
+        # http://docs.peewee-orm.com/en/latest/peewee/relationships.html#subqueries
+        # allegedly, this will be the inner query?
+        Latest = models.Review.alias()
+        lq = (Latest
+              .select(Latest.media_id, fn.MAX(Latest.date_added).alias('max_date'))
+              .group_by(Latest.media_id)
+              .alias('lq'))
+        # this is to match both media id and the latest from the subq above
+        pred = ((models.Review.media_id == lq.c.media_id) &
+                (models.Review.date_added == lq.c.max_date))
+        # the final outer query 
+        q = (models.Review
+             .select(models.Review, models.Media.external_id)
+             .join(lq, on=pred)
+             .join_from(models.Review, models.Media))
+        maybe = [model_to_dict(m) for m in q.execute()]
+        print(maybe)
+        return jsonify(
+            data=maybe,
+            status={
+                "code": 200,
+                "message": "Got all media. *evil laugh*"
+            }
+        )
+    except Exception:
+        return jsonify(
+            data={},
+            status={
+                "code": 500,
+                "message": "It looks like something went wrong. Our bad."
+            }
+        ), 500
