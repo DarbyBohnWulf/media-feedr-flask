@@ -107,7 +107,7 @@ def index_with_reviews():
         # this is to match both media id and the latest from the subq above
         pred = ((models.Review.media_id == lq.c.media_id) &
                 (models.Review.date_added == lq.c.max_date))
-        # the final outer query 
+        # the final outer query
         q = (models.Review
              .select(models.Review, models.Media.external_id)
              .join(lq, on=pred)
