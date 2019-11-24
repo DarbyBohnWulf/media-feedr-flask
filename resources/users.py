@@ -55,7 +55,8 @@ def login():
         return jsonify(
             data={},
             status={
-                "code": 401
+                "code": 401,
+                "message": "Credentials couldn't be verified."
             }
         ), 401
 
