@@ -39,7 +39,7 @@ def add_item():
                 data={},
                 status={
                     "code": 422,
-                    "message": "Cannot process media from before 1906, after 2020."
+                    "message": "Media creation year out of range."
                 }
             ), 422
         else:
@@ -101,7 +101,10 @@ def index_with_reviews():
         # allegedly, this will be the inner query?
         Latest = models.Review.alias()
         lq = (Latest
-              .select(Latest.media_id, fn.MAX(Latest.date_added).alias('max_date'))
+              .select(
+                  Latest.media_id,
+                  fn.MAX(Latest.date_added).alias('max_date')
+              )
               .group_by(Latest.media_id)
               .alias('lq'))
         # this is to match both media id and the latest from the subq above
@@ -109,13 +112,17 @@ def index_with_reviews():
                 (models.Review.date_added == lq.c.max_date))
         # the final outer query
         q = (models.Review
-             .select(models.Review, models.Media.external_id)
+             .select(models.Review, models.Media)
              .join(lq, on=pred)
              .join_from(models.Review, models.Media))
-        maybe = [model_to_dict(m) for m in q.execute()]
-        print(maybe)
+        review_grouped_list = [model_to_dict(m) for m in q.execute()]
+
+        def strip_extra(review):
+            review['user_id'].pop('password')
+            return review
+        safe_list = [strip_extra(r) for r in review_grouped_list]
         return jsonify(
-            data=maybe,
+            data=safe_list,
             status={
                 "code": 200,
                 "message": "Got all media. *evil laugh*"
