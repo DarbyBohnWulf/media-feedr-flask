@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, g
 from flask_login import LoginManager
+from flask_cors import CORS
 from resources.users import user
 from resources.media import media
 from resources.viewership import viewership
@@ -48,6 +49,13 @@ def unauthorized():
             "message": "You must be logged in to do that."
         }
     ), 401
+
+
+CORS(
+    user,
+    origins=['http://localhost:3000'],
+    supports_credential=True
+)
 
 
 app.register_blueprint(user, url_prefix='/api/v1/user')
