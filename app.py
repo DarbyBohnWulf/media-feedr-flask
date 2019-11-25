@@ -54,7 +54,22 @@ def unauthorized():
 CORS(
     user,
     origins=['http://localhost:3000'],
-    supports_credential=True
+    supports_credentials=True
+)
+CORS(
+    media,
+    origins=['http://localhost:3000'],
+    supports_credentials=True
+)
+CORS(
+    viewership,
+    origins=['http://localhost:3000'],
+    supports_credentials=True
+)
+CORS(
+    review,
+    origins=['http://localhost:3000'],
+    supports_credentials=True
 )
 
 
