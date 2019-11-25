@@ -30,35 +30,35 @@ def index():
 def add_item():
     payload = request.get_json()
     try:
-        models.Media.get(models.Media.external_id == payload['external_id'])
-    except models.DoesNotExist:
-        try:
-            new_media = models.Media.create(**payload)
-        except models.IntegrityError:
-            return jsonify(
-                data={},
-                status={
-                    "code": 422,
-                    "message": "Media creation year out of range."
-                }
-            ), 422
-        else:
-            new_media_dict = model_to_dict(new_media)
-            return jsonify(
-                data=new_media_dict,
-                status={
-                    "code": 201,
-                    "message": "Successfully added media item"
-                }
-            ), 201
-    else:
+        new_media = models.Media.get_or_create(**payload)
+    except models.IntegrityError:
         return jsonify(
             data={},
             status={
                 "code": 422,
-                "message": "Cannot add duplicate media item."
+                "message": "Media creation year out of range."
             }
         ), 422
+    else:
+        new_media_dict = model_to_dict(new_media[0])
+        return jsonify(
+            data=new_media_dict,
+            status={
+                "code": 201,
+                "message": "Successfully added media item"
+            }
+        ), 201
+    # try:
+    #     models.Media.get(models.Media.external_id == payload['external_id'])
+    # except models.DoesNotExist:
+    # else:
+    #     return jsonify(
+    #         data={},
+    #         status={
+    #             "code": 422,
+    #             "message": "Cannot add duplicate media item."
+    #         }
+    #     ), 422
 
 
 @media.route('/<id>', methods=['GET'])
