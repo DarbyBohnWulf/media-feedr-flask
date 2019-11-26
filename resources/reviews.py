@@ -65,3 +65,26 @@ def update_review(revId):
                 "message": "That's not your review."
             }
         ), 403
+
+
+@review.route('/<userId>', methods=['GET'])
+@login_required
+def list_all_reviews(userId):
+    q = (models.Review
+         .select()
+         .join(models.User)
+         .where(models.User.id == userId))
+    review_list = [model_to_dict(r) for r in q.execute()]
+
+    def strip_extra(review):
+        print(review)
+        review['user_id'].pop('password')
+        return review
+    clean_list = list(map(strip_extra, review_list))
+    return jsonify(
+        data=clean_list,
+        status={
+            "code": 200,
+            "message": "Got all the reviews"
+        }
+    )
