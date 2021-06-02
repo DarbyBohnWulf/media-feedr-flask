@@ -24,6 +24,6 @@ requests==2.22.0
 six==1.13.0
 snowballstemmer==2.0.0
 stdlib-list==0.5.0
-urllib3==1.25.6
+urllib3==1.26.5
 virtualenv==16.7.7
 Werkzeug==0.16.0
